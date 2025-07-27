@@ -208,7 +208,7 @@ Content-Type: application/json
   "newPassword": "novaSenhaSegura123"
 }
 ```
-✅ **Resposta esperada:** Confirmação de senha atualizada
+✅ **Resposta esperada:** Confirmação de senha atualizada.
 
 ---
 
