@@ -24,13 +24,12 @@ git clone https://github.com/seuusuario/agendei_back_api.git
 cd agendei_back_api
 npm install
 
----bash
+---
 
-## ⚙️ Configuração do .env
+⚙️ Configuração do .env
+Crie um arquivo .env na raiz do projeto com as seguintes variáveis:
 
-Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
-
-```env
+```bash
 # Banco de Dados
 DATABASE_URL=postgresql://usuario_do_banco:senha_do_banco@localhost:5432/agendei_api
 
@@ -49,14 +48,4 @@ JWT_REFRESH_EXPIRES_IN=7d
 SMTP_USER=email_de_envio@gmail.com
 SMTP_PASS=senha_app_gmail
 
----env
-
-## ⚙️ Scripts úteis
-
-```scripts
-- npm run dev                         # inicia com nodemon
-- npm run start                       # inicia com node
-- npx prisma generate                 # gera o client Prisma
-- npx prisma migrate dev --name init # cria/atualiza migracoes
-
----scripts
+---
