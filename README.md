@@ -208,6 +208,7 @@ POST /api/auth/verify-2fa
 Content-Type: application/json
 
 {
+  "userId": 2,
   "token": "123456" // gerado no Google Authenticator
 }
 ```
@@ -267,7 +268,6 @@ Content-Type: application/json
 
 {
   "email": "convidado@email.com",
-  "role": "COORDENADOR"
 }
 
 ##Para registro com token invite ativado
