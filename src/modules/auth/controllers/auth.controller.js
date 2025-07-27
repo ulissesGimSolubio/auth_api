@@ -96,7 +96,7 @@ async function logout(req, res) {
   const { refreshToken } = req.body;
 
   if (!refreshToken) {
-    return res.status(400).json({ error: 'Refresh token não fornecido.' });
+    return res.status(400).json({ message: 'Refresh token não fornecido.' });
   }
 
   try {
@@ -111,16 +111,17 @@ async function logout(req, res) {
     });
 
     if (updated.count === 0) {
-      return res.status(404).json({ error: 'Token não encontrado ou já revogado.' });
+      return res.status(404).json({ message: 'Token não encontrado ou já revogado.' });
     }
 
     return res.status(200).json({ message: 'Logout realizado com sucesso.' });
 
-  } catch (error) {
-    console.error('Erro ao realizar logout:', error);
-    return res.status(500).json({ error: 'Erro interno ao revogar o token.' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Erro interno no servidor.' });
   }
 }
+
 
 // Enable 2FA
 async function enableTwoFactorAuthentication(req, res) {

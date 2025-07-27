@@ -10,7 +10,7 @@ router.post('/register', authController.register);
 router.post('/login', authController.login);
 
 // Nova rota de logout protegida
-router.post('/logout', authMiddleware, authController.logout);
+router.post('/logout', logout);
 
 // Rota para habilitar 2FA (retorna QR code)
 router.post('/enable-2fa', authController.enableTwoFactorAuthentication);
