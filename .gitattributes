@@ -1,5 +1,11 @@
+# Força arquivos .js e .json como JavaScript
 *.js linguist-language=JavaScript
 *.json linguist-language=JavaScript
+
+# Ignora arquivos que não devem influenciar o gráfico
 *.env linguist-detectable=false
 *.md linguist-documentation
+*.sh linguist-detectable=false
+
+# Garante que o package.json conte como JS
 package.json linguist-language=JavaScript
