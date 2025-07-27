@@ -127,3 +127,103 @@ SQLite:
 SQL Server:
   DATABASE_URL="sqlserver://usuario:senha@localhost:1433;database=agendei_api"
 ```
+
+
+---
+
+## 🧪 Testando as Rotas Manualmente
+
+Você pode testar as rotas da API usando ferramentas como [Postman](https://www.postman.com/) ou [Insomnia](https://insomnia.rest/).
+
+### 🔐 Autenticação
+
+#### Registro de usuário
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "email": "usuario@email.com",
+  "password": "senhaSegura123"
+}
+```
+
+#### Login
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "usuario@email.com",
+  "password": "senhaSegura123"
+}
+```
+✅ **Resposta esperada:**  
+- Se 2FA desativado: retorna accessToken e refreshToken  
+- Se 2FA ativado: retorna `{ "2faRequired": true }`
+
+---
+
+### 🔐 2FA
+
+#### Ativar 2FA
+```http
+POST /api/auth/enable-2fa
+Authorization: Bearer <accessToken>
+```
+✅ **Resposta esperada:** QR Code base64 e secret
+
+#### Verificar 2FA
+```http
+POST /api/auth/verify-2fa
+Content-Type: application/json
+
+{
+  "token": "123456" // gerado no Google Authenticator
+}
+```
+✅ **Resposta esperada:** Novos tokens JWT
+
+---
+
+### 🔑 Redefinição de Senha
+
+#### Solicitar redefinição
+```http
+POST /api/password/forgot
+Content-Type: application/json
+
+{
+  "email": "usuario@email.com"
+}
+```
+✅ **Resposta esperada:** E-mail enviado com link/token
+
+#### Redefinir senha
+```http
+POST /api/password/reset/:token
+Content-Type: application/json
+
+{
+  "newPassword": "novaSenhaSegura123"
+}
+```
+✅ **Resposta esperada:** Confirmação de senha atualizada
+
+---
+
+### 🔒 Protegendo rotas
+
+Para acessar rotas protegidas, envie o token JWT no cabeçalho:
+
+```
+Authorization: Bearer <accessToken>
+```
+
+Exemplo:
+
+```http
+GET /api/user/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6...
+```
+
