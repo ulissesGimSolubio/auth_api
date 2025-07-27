@@ -2,7 +2,10 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/auth.controller');
 const authMiddleware = require('../../../middlewares/authMiddleware');
-const hasRole = require('../../../middlewares/roleMiddleware'); // ✅ Faltava isso!
+const hasRole = require('../../../middlewares/roleMiddleware');
+
+const { login } = require("../controllers/auth.controller");
+const limitLoginAttempts = require("../../../middlewares/limitLoginAttempts");
 
 const allowedRoles = process.env.INVITE_ALLOWED_ROLES?.split(',') || [];
 
@@ -10,7 +13,10 @@ const allowedRoles = process.env.INVITE_ALLOWED_ROLES?.split(',') || [];
 router.post('/register', authController.register);
 
 // Rota de login (retorna token ou sinaliza se 2FA é necessário)
-router.post('/login', authController.login);
+router.post('/login', limitLoginAttempts, login);
+
+// Rota de login com limite de tentativas
+router.post("/login", limitLoginAttempts, login);
 
 // Nova rota de logout protegida
 router.post('/logout', authMiddleware, authController.logout);

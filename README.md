@@ -12,6 +12,7 @@ API REST para autenticação com suporte a autenticação em dois fatores (2FA),
 - PostgreSQL + Prisma ORM
 - JWT e Refresh Token
 - 2FA com Speakeasy + QRCode
+- BruteForce validator 5 tentativas (10 min)
 - Bcrypt
 - Nodemailer com Gmail (senha de app)
 - Estrutura modular: controllers, services e middlewares
