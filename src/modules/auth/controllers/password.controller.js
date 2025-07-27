@@ -48,7 +48,7 @@ async function validateResetToken(req, res) {
 
 async function resetPassword(req, res) {
   const { token } = req.params;
-  const { password } = req.body;
+  const { newPassword } = req.body;
 
   const resetEntry = await prisma.passwordResetToken.findUnique({
     where: { token },
@@ -59,7 +59,7 @@ async function resetPassword(req, res) {
     return res.status(400).json({ message: "Token inválido ou expirado" });
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
 
   await prisma.user.update({
     where: { id: resetEntry.userId },
