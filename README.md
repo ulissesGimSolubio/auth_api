@@ -13,6 +13,7 @@ API REST para autenticação com suporte a autenticação em dois fatores (2FA),
 - JWT e Refresh Token
 - 2FA com Speakeasy + QRCode
 - BruteForce validator 5 tentativas (10 min)
+- Blocked e Activate Users
 - Bcrypt
 - Nodemailer com Gmail (senha de app)
 - Estrutura modular: controllers, services e middlewares
@@ -74,7 +75,6 @@ JWT_REFRESH_EXPIRES_IN=7d
 Para ativar o registro de usuários apenas por convite:
 INVITE_REGISTRATION_ENABLED=true    
 INVITE_TOKEN_EXPIRATION_HOURS=24
-INVITE_ALLOWED_ROLES=ADMIN,COORDENADOR
 
 # SMTP (usado para recuperação de senha)
 SMTP_USER=email_de_envio@gmail.com

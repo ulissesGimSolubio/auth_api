@@ -91,7 +91,14 @@ async function register(req, res) {
 // Login
 async function login(req, res) {
   const { email, password } = req.body;
-  const user = req.bruteUser || await prisma.user.findUnique({ where: { email } });
+
+  const emailToFind = req.body.email;
+  const user = await prisma.user.findUnique({
+    where: { email: emailToFind },
+    include: {
+      roles: { include: { role: true } }
+    }
+  });
 
   if (!user) {
     return res.status(401).json({ message: "Credenciais inválidas" });
@@ -99,7 +106,6 @@ async function login(req, res) {
 
   const passwordMatch = await bcrypt.compare(password, user.password);
 
-  // 💾 Registra tentativa
   await prisma.loginAttempt.create({
     data: {
       userId: user.id,
@@ -112,13 +118,28 @@ async function login(req, res) {
     return res.status(401).json({ message: "Credenciais inválidas" });
   }
 
-  // Geração de token ou login bem-sucedido aqui
-  const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, {
-    expiresIn: "15m",
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user.id);
+
+  await prisma.refreshToken.create({
+    data: {
+      token: refreshToken,
+      userId: user.id,
+      expiresAt: add(new Date(), { days: 7 })
+    }
   });
 
-  res.json({ token });
+  res.status(200).json({
+    accessToken,
+    refreshToken,
+    user: {
+      id: user.id,
+      email: user.email,
+      roles: user.roles.map(r => r.role.name)
+    }
+  });
 }
+
 
 // Logout
 async function logout(req, res) {

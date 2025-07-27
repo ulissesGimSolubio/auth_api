@@ -7,7 +7,7 @@ const hasRole = require('../../../middlewares/roleMiddleware');
 const { login } = require("../controllers/auth.controller");
 const limitLoginAttempts = require("../../../middlewares/limitLoginAttempts");
 
-const allowedRoles = process.env.INVITE_ALLOWED_ROLES?.split(',') || [];
+const allowedRoles = ["ADMIN", "COORDENADOR"];
 
 // Rota de registro de novo usuário
 router.post('/register', authController.register);

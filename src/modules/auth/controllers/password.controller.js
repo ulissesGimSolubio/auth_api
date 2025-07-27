@@ -9,7 +9,13 @@ const prisma = new PrismaClient();
 async function forgotPassword(req, res) {
   const { email } = req.body;
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const emailToFind = req.body.email;
+const user = await prisma.user.findUnique({
+  where: { email: emailToFind },
+  include: {
+    roles: { include: { role: true } }
+  }
+});
 
   if (!user) return res.status(200).json({ message: "Se existir, o e-mail foi enviado" });
 
