@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { add } = require('date-fns');
-const { PrismaClient } = require('../../../generated/prisma');
+const { PrismaClient } = require('@prisma/client');
 const twoFactorService = require('../services/twoFactor.service');
 
 const prisma = new PrismaClient();

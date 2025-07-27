@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
+  password  String
+  name      String?
+  phone     String?
+  address   String?
+  city      String?
+  state     String?
+  imagePath String? // Path to uploaded image file
+
+  twoFactorEnabled Boolean @default(false)
+  twoFactorSecret  String?  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy Int?
+  updatedBy Int?
+
+  // Relationships
+  refreshTokens       RefreshToken[]
+  roles               UserRole[]
+  loginAttempts       LoginAttempt[]
+  auditLogs           AuditLog[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+model Role {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  users UserRole[]
+}
+
+model UserRole {
+  id Int @id @default(autoincrement())
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  role   Role @relation(fields: [roleId], references: [id])
+  roleId Int
+
+  @@unique([userId, roleId])
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model LoginAttempt {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  attemptAt DateTime @default(now())
+  success   Boolean
+  ip        String?
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+  action    String
+  ip        String?
+  createdAt DateTime @default(now())
+}
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
