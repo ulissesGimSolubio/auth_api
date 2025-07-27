@@ -250,3 +250,14 @@ Content-Type: application/json
   "email": "convidado@email.com",
   "role": "COORDENADOR"
 }
+
+##Para registro com token invite ativado
+
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "inviteToken": "tokenRecebidoNoEmail",
+  "email": "convidado@email.com",
+  "password": "senhaSegura123"
+}
