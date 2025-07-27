@@ -94,3 +94,36 @@ prisma/
 .env
 server.js
 ```
+
+
+---
+
+## 🧪 Banco de Dados e SMTP Utilizados
+
+Esta API foi implementada utilizando:
+
+```yaml
+Banco de Dados:
+  - PostgreSQL (recomendado)
+    Exemplo de conexão:
+    DATABASE_URL=postgresql://usuario:senha@localhost:5432/agendei_api
+
+SMTP (envio de e-mails):
+  - Gmail com senha de app
+    Exemplo:
+    SMTP_USER=seu_email@gmail.com
+    SMTP_PASS=sua_senha_de_app
+```
+
+### 🔄 Exemplos de outros bancos de dados com Prisma
+
+```yaml
+MySQL:
+  DATABASE_URL="mysql://usuario:senha@localhost:3306/agendei_api"
+
+SQLite:
+  DATABASE_URL="file:./dev.db"
+
+SQL Server:
+  DATABASE_URL="sqlserver://usuario:senha@localhost:1433;database=agendei_api"
+```
