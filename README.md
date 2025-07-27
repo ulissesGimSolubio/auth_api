@@ -24,6 +24,8 @@ git clone https://github.com/seuusuario/agendei_back_api.git
 cd agendei_back_api
 npm install
 
+---
+
 ## ⚙️ Configuração do .env
 
 Crie um arquivo `.env` na raiz do projeto com as seguintes variáveis:
@@ -47,9 +49,14 @@ JWT_REFRESH_EXPIRES_IN=7d
 SMTP_USER=email_de_envio@gmail.com
 SMTP_PASS=senha_app_gmail
 
+---
+
 ## ⚙️ Scripts úteis
 
+```scripts
 - npm run dev                         # inicia com nodemon
 - npm run start                       # inicia com node
 - npx prisma generate                 # gera o client Prisma
 - npx prisma migrate dev --name init # cria/atualiza migracoes
+
+---
