@@ -24,7 +24,7 @@ git clone https://github.com/seuusuario/agendei_back_api.git
 cd agendei_back_api
 npm install
 
----
+---bash
 
 ## ⚙️ Configuração do .env
 
@@ -49,7 +49,7 @@ JWT_REFRESH_EXPIRES_IN=7d
 SMTP_USER=email_de_envio@gmail.com
 SMTP_PASS=senha_app_gmail
 
----
+---env
 
 ## ⚙️ Scripts úteis
 
@@ -59,4 +59,4 @@ SMTP_PASS=senha_app_gmail
 - npx prisma generate                 # gera o client Prisma
 - npx prisma migrate dev --name init # cria/atualiza migracoes
 
----
+---scripts
