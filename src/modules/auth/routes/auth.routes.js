@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/auth.controller');
 const authMiddleware = require('../../../middlewares/authMiddleware');
+const hasRole = require('../../../middlewares/roleMiddleware'); // ✅ Faltava isso!
+
+const allowedRoles = process.env.INVITE_ALLOWED_ROLES?.split(',') || [];
 
 // Rota de registro de novo usuário
 router.post('/register', authController.register);
@@ -20,5 +23,8 @@ router.post('/verify-2fa', authController.verifyTwoFactorAuthentication);
 
 // Rota para renovar o token de acesso
 router.post('/refresh-token', authController.refreshAccessToken);
+
+// ✅ Enviar convite (proteção por roles via .env)
+router.post('/invite', authMiddleware, hasRole(...allowedRoles), authController.sendInvite);
 
 module.exports = router;

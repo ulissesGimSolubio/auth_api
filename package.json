@@ -5,7 +5,22 @@
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
-    "generate": "prisma generate --schema=src/generated/prisma/schema.prisma"
+    "generate": "prisma generate --schema=prisma/schema.prisma",
+    "migrate": "prisma migrate dev --schema=prisma/schema.prisma",
+    "migrate:deploy": "prisma migrate deploy --schema=prisma/schema.prisma",
+    "prisma:studio": "prisma studio --schema=prisma/schema.prisma",
+    "prisma:format": "prisma format --schema=prisma/schema.prisma",
+    "prisma:reset": "prisma migrate reset --force --schema=prisma/schema.prisma",
+    "prisma:db-push": "prisma db push --force --schema=prisma/schema.prisma",
+    "prisma:db-seed": "node prisma/seed.js",
+    "prettier": "prettier --check .",
+    "format": "prettier --write .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "jest --runInBand",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "seed": "node prisma/seed.js"
   },
   "keywords": [],
   "author": "",
@@ -22,7 +37,8 @@
     "nodemailer": "^7.0.5",
     "pg": "^8.16.3",
     "qrcode": "^1.5.4",
-    "speakeasy": "^2.0.0"
+    "speakeasy": "^2.0.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10",

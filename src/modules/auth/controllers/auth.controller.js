@@ -1,8 +1,12 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
+const { addHours } = require('date-fns');
 const { add } = require('date-fns');
 const { PrismaClient } = require('@prisma/client');
 const twoFactorService = require('../services/twoFactor.service');
+const { sendInviteEmail } = require('../services/inviteEmail.service');
+const { validate: isUuid } = require('uuid');
 
 const prisma = new PrismaClient();
 
@@ -25,11 +29,36 @@ function generateRefreshToken(userId) {
 
 // Register
 async function register(req, res) {
-  const { email, password, name } = req.body;
+  const { email, password, name, inviteToken } = req.body;
+  const inviteRequired = process.env.INVITE_REGISTRATION_ENABLED === 'true';
 
   try {
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (inviteRequired) {
+      if (!inviteToken || !isUuid(inviteToken)) {
+        return res.status(400).json({ error: 'Token de convite ausente ou inválido.' });
+      }
 
+      const invite = await prisma.invite.findUnique({ where: { token: inviteToken } });
+
+      if (!invite) {
+        return res.status(403).json({ error: 'Convite não encontrado.' });
+      }
+
+      if (invite.used) {
+        return res.status(403).json({ error: 'Este convite já foi utilizado.' });
+      }
+
+      if (invite.email !== email) {
+        return res.status(403).json({ error: 'Este convite não corresponde ao e-mail informado.' });
+      }
+
+      if (new Date() > invite.expiresAt) {
+        return res.status(403).json({ error: 'Este convite está expirado.' });
+      }
+    }
+
+    // Só chega aqui se tudo estiver válido
+    const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return res.status(409).json({ error: 'Email já cadastrado.' });
     }
@@ -43,6 +72,13 @@ async function register(req, res) {
         name
       }
     });
+
+    if (inviteRequired) {
+      await prisma.invite.update({
+        where: { token: inviteToken },
+        data: { used: true }
+      });
+    }
 
     return res.status(201).json({ message: 'Usuário criado com sucesso.', userId: newUser.id });
 
@@ -233,6 +269,33 @@ async function refreshAccessToken(req, res) {
   }
 }
 
+async function sendInvite(req, res) {
+  const { email } = req.body;
+
+  // Verifica se o usuário já existe
+  const existingUser = await prisma.user.findUnique({ where: { email } });
+  if (existingUser) {
+    return res.status(400).json({ error: 'Usuário já existe.' }); // <-- está certo
+  }
+
+  // Gera token e define validade
+  const token = uuidv4();
+  const expiresAt = addHours(new Date(), parseInt(process.env.INVITE_TOKEN_EXPIRATION_HOURS || '24'));
+
+  // Cria ou atualiza token no banco
+  await prisma.invite.upsert({
+    where: { email },
+    update: { token, expiresAt, used: false },
+    create: { email, token, expiresAt }
+  });
+
+  // Envia o e-mail com o link contendo o token
+  await sendInviteEmail(email, token);
+
+  return res.status(200).json({ message: 'Convite enviado com sucesso. Verifique seu e-mail.' });
+}
+
+
 // Exports
 module.exports = {
   register,
@@ -240,5 +303,6 @@ module.exports = {
   logout,
   enableTwoFactorAuthentication,
   verifyTwoFactorAuthentication,
-  refreshAccessToken
+  refreshAccessToken,
+  sendInvite,
 };
