@@ -1,5 +1,26 @@
-node_modules
-# Keep environment variables out of version control
+# Node modules
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Environment variables
 .env
 
-/src/generated/prisma
+# Prisma client (gerado automaticamente)
+prisma/@prisma/
+
+# VSCode settings
+.vscode/
+
+# Build
+dist/
+build/
+
+# Mac system files
+.DS_Store
+
+# Others
+*.sqlite
