@@ -97,9 +97,9 @@ SMTP_PASS=senha_app_gmail
   - Verificar (/api/auth/verify-2fa)
 
 🔑 Redefinição de Senha:
-  - Solicitar token (/api/password/forgot)
-  - Validar token (/api/password/reset/:token)
-  - Redefinir senha (/api/password/reset/:token)
+  - Solicitar token (/api/auth/forgot-password)
+  - Validar token (/api/auth/reset-password/:token)
+  - Redefinir senha (/api/auth/reset-password/:token", resetPassword)
 
 🛡️ Proteção de rotas com JWT:
   - Middleware: Authorization: Bearer <token>
@@ -219,7 +219,7 @@ Content-Type: application/json
 
 #### Solicitar redefinição
 ```http
-POST /api/password/forgot
+POST /api/forgot-password
 Content-Type: application/json
 
 {
@@ -230,7 +230,7 @@ Content-Type: application/json
 
 #### Redefinir senha
 ```http
-POST /api/password/reset/:token
+POST /api/auth/reset-password/:token
 Content-Type: application/json
 
 {
