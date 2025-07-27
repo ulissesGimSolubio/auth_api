@@ -32,6 +32,7 @@ model User {
   loginAttempts       LoginAttempt[]
   auditLogs           AuditLog[]
   passwordResetTokens PasswordResetToken[]
+  sentInvites         Invite[] @relation("UserSentInvites") 
 }
 
 model Role {
@@ -100,4 +101,5 @@ model Invite {
 
   sentBy     Int?
   sender     User?    @relation(fields: [sentBy], references: [id])
+  sender User? @relation("UserSentInvites", fields: [sentBy], references: [id])
 }
