@@ -33,6 +33,9 @@ npm install
 Crie um arquivo `.env` na raiz do projeto com o seguinte conteúdo:
 
 ```env
+# Sua aplicação
+FRONTEND_URL=https://localhost/3000
+
 # Banco de Dados
 DATABASE_URL=postgresql://usuario_do_banco:senha_do_banco@localhost:5432/agendei_api
 
@@ -46,6 +49,12 @@ JWT_EXPIRES_IN=15m
 # Refresh Token
 JWT_REFRESH_SECRET=outra_senha_secreta
 JWT_REFRESH_EXPIRES_IN=7d
+
+# Registro por Convite (Opcional)
+Para ativar o registro de usuários apenas por convite:
+INVITE_REGISTRATION_ENABLED=true    
+INVITE_TOKEN_EXPIRATION_HOURS=24
+INVITE_ALLOWED_ROLES=ADMIN,COORDENADOR
 
 # SMTP (usado para recuperação de senha)
 SMTP_USER=email_de_envio@gmail.com
@@ -62,6 +71,7 @@ SMTP_PASS=senha_app_gmail
   - Login (/api/auth/login)
   - Logout (/api/auth/logout)
   - Refresh Token (/api/auth/refresh-token)
+  - Envio de invite (/api/auth/invite)
 
 🔐 2FA (Autenticação em dois fatores):
   - Ativar (/api/auth/enable-2fa)
@@ -227,3 +237,16 @@ GET /api/user/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6...
 ```
 
+### ✉️ Registro por Convite
+
+#### Enviar convite (apenas ADMIN ou OUTRA ROLE DEFINIDA)
+
+```http
+POST /api/invite
+Authorization: Bearer <accessToken>
+Content-Type: application/json
+
+{
+  "email": "convidado@email.com",
+  "role": "COORDENADOR"
+}
