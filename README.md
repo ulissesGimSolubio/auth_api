@@ -21,9 +21,28 @@ API REST para autenticação e agendamento, com suporte a autenticação em dois
 ## 📦 Instalação
 
 ```bash
-git clone https://github.com/seuusuario/agendei_back_api.git
-cd agendei_back_api
+git clone https://github.com/ulissesGimSolubio/auth_api.git
+cd auth_api
+
+# 2. Instale as dependências
 npm install
+
+# 3. Crie o arquivo .env com suas configurações
+cp .env.example .env
+nano .env
+# (Preencha os valores de DATABASE_URL, JWT_SECRET, SMTP_USER, etc.)
+
+# 4. Gere o client do Prisma
+npx prisma generate
+
+# 5. Rode as migrações para criar as tabelas no banco
+npx prisma migrate dev --name init
+
+# 6. (Opcional) Popule o banco com dados iniciais
+npm run seed
+
+# 7. Inicie o servidor em modo desenvolvimento
+npm run dev
 ```
 
 ---
