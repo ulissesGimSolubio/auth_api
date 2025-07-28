@@ -30,9 +30,6 @@ const user = await prisma.user.findUnique({
     },
   });
 
-  console.log("✅ [forgotPassword] Gerando token para:", email);
-  console.log("🔑 Token:", token);
-
   await sendPasswordResetEmail(email, token);
   res.json({ message: "E-mail de redefinição enviado" });
 }
