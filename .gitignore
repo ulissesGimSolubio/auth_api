@@ -8,6 +8,7 @@ npm-debug.log*
 
 # Environment variables
 .env
+.env.*
 
 # Prisma client (gerado automaticamente)
 prisma/@prisma/
@@ -24,3 +25,10 @@ build/
 
 # Others
 *.sqlite
+
+# Coverage reports
+coverage/
+
+# Temp files
+tmp/
+temp/

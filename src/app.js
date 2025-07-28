@@ -1,4 +1,10 @@
 const express = require('express');
+const helmet = require('helmet');
+const { configureCORS } = require('./config/cors');
+const { generalLimiter, authLimiter, registerLimiter } = require('./config/rateLimiting');
+const { logger } = require('./config/logger');
+const { testCORS, corsHealthCheck } = require('./utils/corsTest');
+
 const authRoutes = require('./modules/auth/routes/auth.routes');
 const passwordRoutes = require('./modules/auth/routes/password.routes');
 const userRoutes = require("./modules/users/routes/user.routes");
@@ -9,9 +15,33 @@ const authMiddleware = require('./middlewares/authMiddleware');
 
 const app = express();
 
-app.use(express.json());
+// Segurança básica
+app.use(helmet());
+app.use(configureCORS());
 
-// Modular route prefix
+// Rate limiting
+app.use(generalLimiter);
+
+// Middleware básico
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Logging de requisições
+app.use((req, res, next) => {
+  logger.info(`${req.method} ${req.path} - IP: ${req.ip}`);
+  next();
+});
+
+// Rotas de teste/debug (remover em produção se necessário)
+app.get('/api/cors-test', testCORS);
+app.get('/api/health/cors', corsHealthCheck);
+
+// Rotas com rate limiting específico
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', registerLimiter);
+app.use('/api/auth/invite', registerLimiter);
+
+// Rotas modulares
 app.use('/api/auth', authRoutes);
 app.use("/api/auth", passwordRoutes);
 app.use("/api/users", userRoutes);
