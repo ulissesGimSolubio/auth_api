@@ -9,3 +9,5 @@
 
 # Garante que o package.json conte como JS
 package.json linguist-language=JavaScript
+
+n linguist-detectable=false
