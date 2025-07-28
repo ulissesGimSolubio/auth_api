@@ -1,7 +1,7 @@
 
 # 🚀 Back API de autenticação
 
-API REST para autenticação com suporte a autenticação em dois fatores (2FA), reset de senha, tokens JWT e envio de e-mails.
+API REST em NODE JS para autenticação com suporte a autenticação em dois fatores (2FA), reset de senha, tokens JWT e envio de e-mails.
 
 ---
 
