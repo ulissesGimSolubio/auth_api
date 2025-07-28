@@ -1,3 +1,6 @@
+const { loadEnvironment } = require('./src/config/environment');
+loadEnvironment();
+
 const app = require('./src/app');
 const { validateDatabaseConnection } = require('./src/config/dbConnection');
 
