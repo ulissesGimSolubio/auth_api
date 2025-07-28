@@ -92,40 +92,54 @@ async function register(req, res) {
 async function login(req, res) {
   const { email, password } = req.body;
 
-  try {
-    const user = await prisma.user.findUnique({
-      where: { email },
-      include: {
-        roles: { include: { role: true } }
-      }
-    });
-
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ error: 'Credenciais inválidas.' });
+  const emailToFind = req.body.email;
+  const user = await prisma.user.findUnique({
+    where: { email: emailToFind },
+    include: {
+      roles: { include: { role: true } }
     }
+  });
 
-    if (user.twoFactorEnabled) {
-      return res.status(200).json({ twoFactorRequired: true, userId: user.id });
-    }
-
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user.id);
-
-    await prisma.refreshToken.create({
-      data: {
-        token: refreshToken,
-        userId: user.id,
-        expiresAt: add(new Date(), { days: 7 })
-      }
-    });
-
-    return res.status(200).json({ accessToken, refreshToken });
-
-  } catch (error) {
-    console.error('Erro no login:', error);
-    return res.status(500).json({ error: 'Erro no login.' });
+  if (!user) {
+    return res.status(401).json({ message: "Credenciais inválidas" });
   }
+
+  const passwordMatch = await bcrypt.compare(password, user.password);
+
+  await prisma.loginAttempt.create({
+    data: {
+      userId: user.id,
+      success: passwordMatch,
+      ip: req.ip,
+    },
+  });
+
+  if (!passwordMatch) {
+    return res.status(401).json({ message: "Credenciais inválidas" });
+  }
+
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user.id);
+
+  await prisma.refreshToken.create({
+    data: {
+      token: refreshToken,
+      userId: user.id,
+      expiresAt: add(new Date(), { days: 7 })
+    }
+  });
+
+  res.status(200).json({
+    accessToken,
+    refreshToken,
+    user: {
+      id: user.id,
+      email: user.email,
+      roles: user.roles.map(r => r.role.name)
+    }
+  });
 }
+
 
 // Logout
 async function logout(req, res) {

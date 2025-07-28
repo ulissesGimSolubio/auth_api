@@ -9,7 +9,13 @@ const prisma = new PrismaClient();
 async function forgotPassword(req, res) {
   const { email } = req.body;
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const emailToFind = req.body.email;
+const user = await prisma.user.findUnique({
+  where: { email: emailToFind },
+  include: {
+    roles: { include: { role: true } }
+  }
+});
 
   if (!user) return res.status(200).json({ message: "Se existir, o e-mail foi enviado" });
 
@@ -23,9 +29,6 @@ async function forgotPassword(req, res) {
       expiresAt,
     },
   });
-
-  console.log("✅ [forgotPassword] Gerando token para:", email);
-  console.log("🔑 Token:", token);
 
   await sendPasswordResetEmail(email, token);
   res.json({ message: "E-mail de redefinição enviado" });
