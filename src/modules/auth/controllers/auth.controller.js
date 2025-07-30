@@ -129,6 +129,22 @@ async function login(req, res) {
     }
   });
 
+  // 🔐 Enviar cookie HttpOnly com o access_token
+  res.cookie('access_token', accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 15 * 60 * 1000, // 15 minutos
+  });
+
+  // 🔐 Enviar refresh_token também como cookie, opcionalmente
+  res.cookie('refresh_token', refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
+  });
+
   res.status(200).json({
     accessToken,
     refreshToken,
@@ -150,27 +166,35 @@ async function logout(req, res) {
   }
 
   try {
-    const updated = await prisma.refreshToken.updateMany({
+    // Revoga o token no banco
+    await prisma.refreshToken.updateMany({
       where: {
         token: refreshToken,
-        revoked: false
+        revoked: false,
       },
-      data: {
-        revoked: true
-      }
+      data: { revoked: true },
     });
 
-    if (updated.count === 0) {
-      return res.status(404).json({ error: 'Token não encontrado ou já revogado.' });
-    }
+    // Limpa os cookies no navegador do usuário
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    });
+
+    res.clearCookie('refresh_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    });
 
     return res.status(200).json({ message: 'Logout realizado com sucesso.' });
-
   } catch (error) {
     console.error('Erro ao realizar logout:', error);
     return res.status(500).json({ error: 'Erro interno ao revogar o token.' });
   }
 }
+
 
 // Enable 2FA
 async function enableTwoFactorAuthentication(req, res) {
