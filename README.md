@@ -136,7 +136,7 @@ Esta API foi implementada utilizando:
 Banco de Dados:
   - PostgreSQL (recomendado)
     Exemplo de conexão:
-    DATABASE_URL=postgresql://usuario:senha@localhost:5432/agendei_api
+    DATABASE_URL=postgresql://usuario:senha@localhost:5432/auth_api
 
 SMTP (envio de e-mails):
   - Gmail com senha de app
