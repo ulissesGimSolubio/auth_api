@@ -137,6 +137,7 @@ router.post('/verify-2fa', authController.verifyTwoFactorAuthentication);
  *         description: Refresh token inválido ou expirado
  */
 router.post('/refresh-token', authController.refreshAccessToken);
+
 /**
  * @swagger
  * /auth/invite:
@@ -160,5 +161,21 @@ router.post('/refresh-token', authController.refreshAccessToken);
  *         description: Acesso negado (role inválida)
  */
 router.post('/invite', authMiddleware, hasRole(...allowedRoles), authController.sendInvite);
+
+/**
+ * @swagger
+ * /auth/me:
+ *   get:
+ *     summary: Obter perfil do usuário autenticado
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Perfil do usuário retornado com sucesso
+ *       401:
+ *         description: Não autenticado
+ */
+router.get('/me', authMiddleware, authController.getProfile);
 
 module.exports = router;

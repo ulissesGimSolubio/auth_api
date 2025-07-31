@@ -129,6 +129,7 @@ async function login(req, res) {
     }
   });
 
+<<<<<<< Updated upstream
   // 🔐 Enviar cookie HttpOnly com o access_token
   res.cookie('access_token', accessToken, {
     httpOnly: true,
@@ -154,8 +155,45 @@ async function login(req, res) {
       roles: user.roles.map(r => r.role.name)
     }
   });
+=======
+  const cookieHttpOnly = process.env.COOKIE_HTTP_ONLY === 'true';
+  if (cookieHttpOnly) {
+    // Cookies seguros para produção
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax',
+      maxAge: 15 * 60 * 1000 // 15 minutos
+    });
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 dias
+    });
+    return res.status(200).json({
+      user: {
+        id: user.id,
+        email: user.email,
+        roles: user.roles.map(r => r.role.name)
+      },
+      message: 'Tokens enviados como cookies HTTP Only.'
+    });
+  } else {
+    // Envia tokens no corpo da resposta (menos seguro)
+    return res.status(200).json({
+      accessToken,
+      refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        roles: user.roles.map(r => r.role.name)
+      }
+    });
+  }
+>>>>>>> Stashed changes
 }
-
 
 // Logout
 async function logout(req, res) {
@@ -333,6 +371,31 @@ async function sendInvite(req, res) {
   return res.status(200).json({ message: 'Convite enviado com sucesso. Verifique seu e-mail.' });
 }
 
+async function getProfile(req, res) {
+  try {
+    const userId = req.user.id;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        roles: { include: { role: true } }
+      }
+    });
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+    return res.status(200).json({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      roles: user.roles.map(r => r.role.name),
+      status: user.status,
+      createdAt: user.createdAt
+    });
+  } catch (error) {
+    console.error('Erro ao buscar perfil:', error);
+    return res.status(500).json({ error: 'Erro ao buscar perfil.' });
+  }
+}
 
 // Exports
 module.exports = {
@@ -343,4 +406,5 @@ module.exports = {
   verifyTwoFactorAuthentication,
   refreshAccessToken,
   sendInvite,
+  getProfile,
 };
