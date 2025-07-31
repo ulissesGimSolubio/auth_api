@@ -129,75 +129,64 @@ async function login(req, res) {
     }
   });
 
-<<<<<<< Updated upstream
-  // 🔐 Enviar cookie HttpOnly com o access_token
-  res.cookie('access_token', accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    maxAge: 15 * 60 * 1000, // 15 minutos
-  });
-
-  // 🔐 Enviar refresh_token também como cookie, opcionalmente
-  res.cookie('refresh_token', refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias
-  });
-
-  res.status(200).json({
-    accessToken,
-    refreshToken,
-    user: {
-      id: user.id,
-      email: user.email,
-      roles: user.roles.map(r => r.role.name)
-    }
-  });
-=======
   const cookieHttpOnly = process.env.COOKIE_HTTP_ONLY === 'true';
+  
   if (cookieHttpOnly) {
-    // Cookies seguros para produção
+    // Configuração de cookies seguros
     const isProduction = process.env.NODE_ENV === 'production';
-    res.cookie('accessToken', accessToken, {
+    const cookieOptions = {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? 'strict' : 'lax',
+    };
+
+    // Define cookies com tokens
+    res.cookie('accessToken', accessToken, {
+      ...cookieOptions,
       maxAge: 15 * 60 * 1000 // 15 minutos
     });
+    
     res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'strict' : 'lax',
+      ...cookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 dias
     });
+
     return res.status(200).json({
       user: {
         id: user.id,
         email: user.email,
+        name: user.name,
         roles: user.roles.map(r => r.role.name)
       },
-      message: 'Tokens enviados como cookies HTTP Only.'
+      message: 'Login realizado com sucesso. Tokens enviados como cookies HTTP Only.'
     });
   } else {
-    // Envia tokens no corpo da resposta (menos seguro)
+    // Modo tradicional: envia tokens no corpo da resposta
     return res.status(200).json({
       accessToken,
       refreshToken,
       user: {
         id: user.id,
         email: user.email,
+        name: user.name,
         roles: user.roles.map(r => r.role.name)
       }
     });
   }
->>>>>>> Stashed changes
 }
 
 // Logout
 async function logout(req, res) {
-  const { refreshToken } = req.body;
+  const cookieHttpOnly = process.env.COOKIE_HTTP_ONLY === 'true';
+  let refreshToken;
+
+  if (cookieHttpOnly) {
+    // Se usando cookies, pega o refresh token do cookie
+    refreshToken = req.cookies.refreshToken;
+  } else {
+    // Se não usando cookies, pega do corpo da requisição
+    refreshToken = req.body.refreshToken;
+  }
 
   if (!refreshToken) {
     return res.status(400).json({ error: 'Refresh token não fornecido.' });
@@ -213,18 +202,18 @@ async function logout(req, res) {
       data: { revoked: true },
     });
 
-    // Limpa os cookies no navegador do usuário
-    res.clearCookie('access_token', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    });
+    if (cookieHttpOnly) {
+      // Limpa os cookies no navegador do usuário
+      const isProduction = process.env.NODE_ENV === 'production';
+      const cookieOptions = {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'strict' : 'lax',
+      };
 
-    res.clearCookie('refresh_token', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    });
+      res.clearCookie('accessToken', cookieOptions);
+      res.clearCookie('refreshToken', cookieOptions);
+    }
 
     return res.status(200).json({ message: 'Logout realizado com sucesso.' });
   } catch (error) {
@@ -305,7 +294,16 @@ async function verifyTwoFactorAuthentication(req, res) {
 
 // Refresh Token
 async function refreshAccessToken(req, res) {
-  const { refreshToken } = req.body;
+  const cookieHttpOnly = process.env.COOKIE_HTTP_ONLY === 'true';
+  let refreshToken;
+
+  if (cookieHttpOnly) {
+    // Se usando cookies, pega o refresh token do cookie
+    refreshToken = req.cookies.refreshToken;
+  } else {
+    // Se não usando cookies, pega do corpo da requisição
+    refreshToken = req.body.refreshToken;
+  }
 
   if (!refreshToken) {
     return res.status(400).json({ error: 'Refresh token não fornecido.' });
@@ -337,7 +335,21 @@ async function refreshAccessToken(req, res) {
     }
 
     const newAccessToken = generateAccessToken(user);
-    return res.status(200).json({ accessToken: newAccessToken });
+    
+    if (cookieHttpOnly) {
+      // Atualiza o cookie com o novo access token
+      const isProduction = process.env.NODE_ENV === 'production';
+      res.cookie('accessToken', newAccessToken, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'strict' : 'lax',
+        maxAge: 15 * 60 * 1000 // 15 minutos
+      });
+      
+      return res.status(200).json({ message: 'Token renovado com sucesso.' });
+    } else {
+      return res.status(200).json({ accessToken: newAccessToken });
+    }
 
   } catch (error) {
     console.error('Erro ao renovar token:', error);

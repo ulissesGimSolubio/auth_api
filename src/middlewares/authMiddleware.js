@@ -1,13 +1,26 @@
 const jwt = require('jsonwebtoken');
 
 const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const cookieHttpOnly = process.env.COOKIE_HTTP_ONLY === 'true';
+  let token;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Token não fornecido.' });
+  if (cookieHttpOnly) {
+    // Tenta obter o token do cookie
+    token = req.cookies.accessToken;
+    
+    if (!token) {
+      return res.status(401).json({ message: 'Token de acesso não encontrado nos cookies.' });
+    }
+  } else {
+    // Modo tradicional: obtém token do header Authorization
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Token não fornecido.' });
+    }
+
+    token = authHeader.split(' ')[1];
   }
-
-  const token = authHeader.split(' ')[1];
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);

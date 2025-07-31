@@ -1,5 +1,6 @@
 const express = require('express');
 const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
 const { configureCORS } = require('./config/cors');
 const { generalLimiter, authLimiter, registerLimiter } = require('./config/rateLimiting');
 const { logger } = require('./config/logger');
@@ -25,6 +26,7 @@ app.use(generalLimiter);
 // Middleware básico
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Logging de requisições
 app.use((req, res, next) => {
