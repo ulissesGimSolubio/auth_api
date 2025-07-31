@@ -62,9 +62,6 @@ router.post('/register', authController.register);
  */
 router.post('/login', limitLoginAttempts, login);
 
-// Rota de login com limite de tentativas
-router.post("/login", limitLoginAttempts, login);
-
 /**
  * @swagger
  * /auth/logout:
