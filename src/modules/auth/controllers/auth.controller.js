@@ -181,10 +181,20 @@ async function logout(req, res) {
   let refreshToken;
 
   if (cookieHttpOnly) {
-    // Se usando cookies, pega o refresh token do cookie
+    // Se usando cookies, verifica se req.cookies está disponível e é um objeto
+    if (!req.cookies || typeof req.cookies !== 'object') {
+      console.error('req.cookies não está definido ou não é um objeto. Verifique se o cookie-parser está configurado.');
+      return res.status(400).json({ error: 'Cookies não disponíveis. Verifique a configuração do cookie-parser.' });
+    }
+    if (typeof req.cookies.refreshToken === 'undefined' || req.cookies.refreshToken === null) {
+      return res.status(400).json({ error: 'Refresh token não fornecido via cookie.' });
+    }
     refreshToken = req.cookies.refreshToken;
   } else {
-    // Se não usando cookies, pega do corpo da requisição
+    // Aqui é modo localStorage/token no corpo da requisição
+    if (!req.body || typeof req.body.refreshToken === 'undefined' || req.body.refreshToken === null) {
+      return res.status(400).json({ error: 'Refresh token não fornecido.' });
+    }
     refreshToken = req.body.refreshToken;
   }
 
@@ -203,7 +213,6 @@ async function logout(req, res) {
     });
 
     if (cookieHttpOnly) {
-      // Limpa os cookies no navegador do usuário
       const isProduction = process.env.NODE_ENV === 'production';
       const cookieOptions = {
         httpOnly: true,
@@ -217,7 +226,7 @@ async function logout(req, res) {
 
     return res.status(200).json({ message: 'Logout realizado com sucesso.' });
   } catch (error) {
-    console.error('Erro ao realizar logout:', error);
+    console.error('Erro ao realizar logout:', error.stack || error);
     return res.status(500).json({ error: 'Erro interno ao revogar o token.' });
   }
 }
