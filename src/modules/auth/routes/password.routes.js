@@ -4,7 +4,9 @@ const {
   forgotPassword,
   validateResetToken,
   resetPassword,
+  changePassword,
 } = require("../controllers/password.controller");
+const authMiddleware = require("../../../middlewares/authMiddleware"); // ajuste o caminho se necessário
 
 const router = express.Router();
 
@@ -96,6 +98,42 @@ router.get("/reset-password/:token", validateResetToken);
  *         description: Token inválido ou erro de validação
  */
 router.post("/reset-password/:token", resetPassword);
+
+/**
+ * @swagger
+ * /auth/change-password:
+ *   post:
+ *     summary: Alterar senha do usuário autenticado
+ *     tags: [Password]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 format: password
+ *                 example: MinhaSenhaAtual@123
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *                 example: NovaSenha@123
+ *     responses:
+ *       200:
+ *         description: Senha alterada com sucesso
+ *       400:
+ *         description: Erro de validação ou senha atual incorreta
+ *       401:
+ *         description: Não autenticado
+ */
+router.post("/change-password", authMiddleware, changePassword);
 
 /**
  * @swagger

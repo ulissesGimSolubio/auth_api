@@ -74,8 +74,43 @@ async function resetPassword(req, res) {
   res.json({ message: "Senha atualizada com sucesso" });
 }
 
+// Altera a senha do usuário autenticado
+async function changePassword(req, res) {
+  try {
+    const userId = req.user.id; // req.user deve ser preenchido pelo middleware de autenticação
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Senha atual e nova senha são obrigatórias.' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+
+    const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!passwordMatch) {
+      return res.status(400).json({ error: 'Senha atual incorreta.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword }
+    });
+
+    return res.status(200).json({ message: 'Senha alterada com sucesso.' });
+  } catch (error) {
+    console.error('Erro ao alterar senha:', error);
+    return res.status(500).json({ error: 'Erro ao alterar senha.' });
+  }
+}
+
 module.exports = {
   forgotPassword,
   validateResetToken,
   resetPassword,
+  changePassword,
 };
